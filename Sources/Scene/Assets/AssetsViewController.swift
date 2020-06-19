@@ -221,13 +221,17 @@ extension AssetsViewController: PHPhotoLibraryChangeObserver {
                     if let inserted = changes.insertedIndexes, inserted.count > 0 {
                         self.collectionView.insertItems(at: inserted.map { IndexPath(item: $0, section:0) })
                     }
+                }, completion: { _ in
                     if let changed = changes.changedIndexes, changed.count > 0 {
                         self.collectionView.reloadItems(at: changed.map { IndexPath(item: $0, section:0) })
                     }
-                    changes.enumerateMoves { fromIndex, toIndex in
-                        self.collectionView.moveItem(at: IndexPath(item: fromIndex, section: 0),
-                                                     to: IndexPath(item: toIndex, section: 0))
-                    }
+
+                    self.collectionView.performBatchUpdates({
+                        changes.enumerateMoves { fromIndex, toIndex in
+                            self.collectionView.moveItem(at: IndexPath(item: fromIndex, section: 0),
+                                                         to: IndexPath(item: toIndex, section: 0))
+                        }
+                    })
                 })
             } else {
                 self.fetchResult = changes.fetchResultAfterChanges
